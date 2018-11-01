@@ -22,17 +22,9 @@ return [
     
     //'hello/[:name]' => 'hello/hello',
     'hello/[:name]' => ['hello/hello', ['method' => 'get', 'ext' => 'html']],
-    
-    /*
-    'blog/:year/:month' => ['blog/archive', ['method' => 'get'], ['year' => '\d{4}', 'month' => '\d{2}']],
-    'blog/:id'          => ['blog/get', ['method' => 'get'], ['id' => '\d+']],
-    'blog/:name'        => ['blog/read', ['method' => 'get'], ['name' => '\w+']],
-    */
-    
-    '[blog]' => [
-        ':year/:month' => ['blog/archive', ['method' => 'get'], ['year' => '\d{4}', 'month' => '\d{2}']],    
-        ':id'          => ['blog/get', ['method' => 'get'], ['id' => '\d+']],
-        ':name'        => ['blog/read', ['method' => 'get'], ['name' => '\w+']],
+
+    '[list]' => [
+        ':name'        => ['lists/index', ['method' => 'get'], ['name' => '\w+']],
     ],
    
 

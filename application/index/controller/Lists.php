@@ -9,19 +9,15 @@ use think\Session;
 use app\index\model\UserModel;
 
 
-class Index extends Controller
+class Lists extends Controller
 {
-    public function Index()
+    public function index()
     {
-        $fromid     =input("fromid");
-        $toid       =input("toid");
-        $this->assign('fromid',$fromid);
-        $this->assign('toid',$toid);
 
+        $fromid     =input("fromid");
+
+        $this->assign('fromid',$fromid);
         return $this->fetch();
     }
 
-
-
 }
-

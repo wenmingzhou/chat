@@ -182,5 +182,66 @@ class Chat extends Controller
         }
     }
 
+    /**
+     * 根据当前用户回去聊天列表
+     */
+    public function get_list()
+    {
+
+        if(Request::instance()->isAjax()) {
+            $fromId = input('fromid');
+            $info = Db::name('communication')->field(['fromid', 'toid', 'fromname'])->where(['toid' =>$fromId])->group('fromid')->select();
+
+            $rows =array_map(function ($res) {
+                return [
+                    'head_url' =>$this->get_head_one($res['fromid']),
+                    'username' =>$res['fromname'],
+                    'countNoread' =>$this->getCountNoread($res['fromid'],$res['toid']),
+                    'last_message' =>$this->getLastMessage($res['fromid'],$res['toid']),
+                    'chat_page' =>"http://www.chat.com/?fromid=".$res['toid']."&toid=".$res['fromid'],
+                ];
+            },$info);
+            return $rows;
+
+
+
+
+        }
+    }
+
+    /**
+     * @param $fromid
+     * @param $toid
+     * 根据fromid获取最后一条数据
+     */
+    public function getLastMessage($fromid,$toid)
+    {
+        $info =Db::name("communication")->where('(fromid=:fromid and toid=:toid) || (fromid=:toid1 and toid=:fromid1)',
+            ['fromid' => $fromid, 'toid' => $toid, 'toid1' => $toid, 'fromid1' => $fromid])->order('id desc')->limit(1)->find();
+        return $info;
+    }
+
+    /**根据uid获取头像
+     * @param $uid
+     */
+    public function get_head_one($uid)
+    {
+
+        $userinfo = Db::name("user")->where('id', $uid)->field('headimgurl')->find();
+
+        return $userinfo['headimgurl'];
+    }
+
+
+    /**
+     * @param $from
+     * @param $toid
+     * 根据fromid获取未读消息数量
+     */
+    public function getCountNoread($fromid,$toid)
+    {
+        return Db::name('communication')->where(['fromid' =>$fromid,'toid' =>$toid,'isread' =>0])->count('*');
+    }
+
 
 }

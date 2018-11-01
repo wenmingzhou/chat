@@ -52,7 +52,7 @@
     var online      =0;
     var API_URL ='http://www.chat.com/index.php/api/chat/';
     var ws =  new WebSocket("ws://127.0.0.1:8282");
-    var toHeader='http://img19.house365.com/ads/nj/2016/01/28/1453970407-632510.jpg';
+
     ws.onmessage = function(e){
         var message =eval('('+e.data+')');
         console.log(message);
