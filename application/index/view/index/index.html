@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
+    <title>沟通中</title>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/newcj/css/themes.css?v=2017129">
+    <link rel="stylesheet" type="text/css" href="__STATIC__/newcj/css/h5app.css">
+    <link rel="stylesheet" type="text/css" href="__STATIC__/newcj/fonts/iconfont.css?v=2016070717">
+    <script src="__STATIC__/newcj/js/jquery.min2.js"></script>
+    <script src="__STATIC__/newcj/js/dist/flexible/flexible_css.debug.js"></script>
+    <script src="__STATIC__/newcj/js/dist/flexible/flexible.debug.js"></script>
+
+</head>
+<body ontouchstart>
+<div class='fui-page-group'>
+<div class='fui-page chatDetail-page'>
+    <div class="chat-header flex">
+        <i class="icon icon-toleft t-48"></i>
+        <span class="shop-titlte t-30"></span>
+        <span class="shop-online t-26"></span>
+        <span class="into-shop"></span>
+    </div>
+    <div class="fui-content navbar" style="padding:1.2rem 0 1.35rem 0;">
+        <div class="chat-content">
+            <p style="display: none;text-align: center;padding-top: 0.5rem" id="more"><a>加载更多</a></p>
+            <p class="chat-time"><span class="time">2018-08-16</span></p>
+        </div>
+    </div>
+    <div class="fix-send flex footer-bar">
+        <i class="icon icon-emoji1 t-50"></i>
+        <input class="send-input t-28" maxlength="200" id="send-input">
+        <input type="file" name="pic" id="file" style="display:none"/>
+        <i class="icon icon-add image_up t-50" style="color: #888;"></i>
+        <span class="send-btn">发送</span>
+    </div>
+</div>
+</div>
+<script>
+    var fromid      ={$fromid};
+    var toid        ={$toid};
+    var fromhead    ='';
+    var tohead      ='';
+    var toname      ='';
+    var API_URL ='http://www.chat.com/index.php/api/chat/';
+    var ws =  new WebSocket("ws://127.0.0.1:8282");
+    var toHeader='http://img19.house365.com/ads/nj/2016/01/28/1453970407-632510.jpg';
+    ws.onmessage = function(e){
+        var message =eval('('+e.data+')');
+        console.log(message);
+        switch (message.type)
+        {
+            case "init":
+                    var blid ='{"type":"bind","fromid":"'+fromid+'"}';
+                    ws.send(blid);
+                    get_head(fromid,toid);
+                    get_name(toid);
+                    message_load();
+                    var online ='{"type":"online","toid":"'+toid+'","fromid":"'+fromid+'"}';
+                    ws.send(online);
+                    get_time(fromid,toid);
+                    return;
+            case "text":
+                if(toid==message.fromid){
+                    $('.chat-content').append('<div class="chat-text section-left flex">'+
+                        '<span class="char-img" style="background-image: url('+tohead+')"></span>'+
+                        '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+message.data+'</span>'+
+                        '</div>');
+
+                    $('.chat-content').scrollTop(3000);
+                    return;
+                }
+
+            case "save":
+                save_message(message);
+                if(message.is_read==1)
+                {
+
+                    $(".shop-online").text("在线");
+                }else
+                {
+                    $(".shop-online").text("不在线");
+                }
+
+                return ;
+
+            case "online":
+                if(message.status==1)
+                {
+
+                    $(".shop-online").text("在线");
+                }else
+                {
+                    $(".shop-online").text("不在线");
+                }
+                return ;
+        }
+    }
+
+    /**
+     * 获取最近聊天记录
+     */
+    function message_load() {
+        $.post(
+            API_URL+"load",
+            {"fromid":fromid,"toid":toid},
+            function (e) {
+                $.each(e,function (index,content) {
+                    if(fromid==content.fromid)
+                    {
+                        $('.chat-content').append('<div class="chat-text section-right flex">'+
+                            '<span class="char-img" style="background-image: url('+fromhead+')"></span>'+
+                            '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+content.content+'</span>'+
+                            '</div>');
+                    }else
+                    {
+                        $('.chat-content').append('<div class="chat-text section-left flex">'+
+                            '<span class="char-img" style="background-image: url('+tohead+')"></span>'+
+                            '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+content.content+'</span>'+
+                            '</div>');
+                    }
+                    $('.chat-content').scrollTop(3000);
+
+
+                })
+                console.log(e);
+            },'json'
+        )
+    }
+
+    /**
+     * 获取跟谁聊天人名称
+     * @param toid
+     */
+    function get_name(toid) {
+        $.post(
+            API_URL+"get_name",
+            {"uid":toid},
+            function (e) {
+                toname =e.toname;
+                $(".shop-titlte").text("与"+toname+"聊天中...");
+            },'json'
+        )
+    }
+
+    /**
+     * 显示聊天双方的时间
+     * @param fromid
+     * @param toid
+     */
+    function get_time(fromid,toid) {
+        $.post(
+            API_URL+"get_time",
+            {"fromid":fromid,"toid":toid},
+            function (e) {
+                e =timestampToTime(e);
+                $(".chat-time .time").text(e);
+                console.log(e);
+            },'json'
+        )
+    }
+
+    function timestampToTime(timestamp) {
+        var date = new Date(timestamp * 1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        Y = date.getFullYear() + '-';
+        M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+        D = date.getDate() + ' ';
+        h = date.getHours() + ':';
+        m = (date.getMinutes() < 10 ? '0'+(date.getMinutes()) : date.getMinutes()) + ':';
+        s = (date.getSeconds() < 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+        return Y+M+D+h+m+s;
+    }
+
+
+    /**
+     * 获取聊天双方的头像
+     * @param fromid
+     * @param toid
+     */
+    function get_head(fromid,toid) {
+        $.post(
+            API_URL+"get_head",
+            {"fromid":fromid,"toid":toid},
+            function (e) {
+                fromhead    =e.from_head;
+                tohead      =e.to_head;
+                //console.log(e);
+                $(".section-right .char-img").css("background-image","url(" +fromhead+")");
+                $(".section-left .char-img").css("background-image","url(" +tohead+")");
+            },'json'
+        )
+    }
+
+    /**
+     * 数据持久化
+     * @param message
+     */
+
+    function save_message(message) {
+        $.post(
+            API_URL+"save_message",
+            message,
+            function () {
+            },'json'
+        )
+    }
+
+    $(".send-btn").click(function () {
+        var text =$(".send-input").val();
+
+        var message ='{"data":"'+text+'","type":"say","fromid":"'+fromid+'","toid":"'+toid+'"}';
+        $('.chat-content').append('<div class="chat-text section-right flex">'+
+            '<span class="char-img" style="background-image: url('+fromhead+')"></span>'+
+            '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+text+'</span>'+
+            '</div>');
+        $('.chat-content').scrollTop(3000);
+        ws.send(message);
+        $(".send-input").val('');
+    })
+
+</script>
+</body>
+</html>
