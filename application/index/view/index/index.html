@@ -73,6 +73,19 @@
                     return;
                 }
 
+            case "say_img":
+                if(toid==message.fromid){
+                    var imgPath = "__ROOT__/uploads/"+message.img_name;
+                    $('.chat-content').append('<div class="chat-text section-left flex">'+
+                        '<span class="char-img" style="background-image: url('+tohead+')"></span>'+
+                        '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+
+                        '<img height="120em" with="120em" src ="'+imgPath+'"></span>'+
+                        '</div>');
+
+                    $('.chat-content').scrollTop(3000);
+                    return;
+                }
+
             case "save":
                 save_message(message);
                 if(message.is_read==1)
@@ -110,18 +123,44 @@
             {"fromid":fromid,"toid":toid},
             function (e) {
                 $.each(e,function (index,content) {
+                    var imgPath = "__ROOT__/uploads/"+content.content;
                     if(fromid==content.fromid)
                     {
-                        $('.chat-content').append('<div class="chat-text section-right flex">'+
-                            '<span class="char-img" style="background-image: url('+fromhead+')"></span>'+
-                            '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+content.content+'</span>'+
-                            '</div>');
+                        if(content.type==2)
+                        {
+
+                            $('.chat-content').append('<div class="chat-text section-right flex">'+
+                                '<span class="char-img" style="background-image: url('+fromhead+')"></span>'+
+                                '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+
+                                '<img height="120em" with="120em" src ="'+imgPath+'"></span>'+
+                                '</div>');
+                        }
+                        else
+                        {
+                            $('.chat-content').append('<div class="chat-text section-right flex">'+
+                                '<span class="char-img" style="background-image: url('+fromhead+')"></span>'+
+                                '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+content.content+'</span>'+
+                                '</div>');
+                        }
+
                     }else
                     {
-                        $('.chat-content').append('<div class="chat-text section-left flex">'+
-                            '<span class="char-img" style="background-image: url('+tohead+')"></span>'+
-                            '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+content.content+'</span>'+
-                            '</div>');
+                        if(content.type==2)
+                        {
+                            $('.chat-content').append('<div class="chat-text section-left flex">'+
+                                '<span class="char-img" style="background-image: url('+tohead+')"></span>'+
+                                '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+
+                                '<img height="120em" with="120em" src ="'+imgPath+'"></span>'+
+                                '</div>');
+                        }
+                        else
+                        {
+                            $('.chat-content').append('<div class="chat-text section-left flex">'+
+                                '<span class="char-img" style="background-image: url('+tohead+')"></span>'+
+                                '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+content.content+'</span>'+
+                                '</div>');
+                        }
+
                     }
                     $('.chat-content').scrollTop(3000);
 
@@ -225,7 +264,10 @@
     $(".image_up").click(function () {
         $("#file").click();
     })
-    
+
+    /**
+     *图片发送
+     */
     $("#file").change(function () {
         formdata =new FormData();
         formdata.append('fromid',fromid);
@@ -243,8 +285,24 @@
             processData:false,
             contentType:false,
             success:function (data,status,xhr) {
-
                 console.log(data);
+                if(data.status=='ok')
+                {
+                    var imgPath = "__ROOT__/uploads/"+data.img_name;
+                    $('.chat-content').append('<div class="chat-text section-right flex">'+
+                        '<span class="char-img" style="background-image: url('+fromhead+')"></span>'+
+                        '<span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+
+                        '<img height="120em" with="120em" src ="'+imgPath+'"></span>'+
+                        '</div>');
+
+                    var message ='{"data":"'+data.img_name+'","type":"say_img","fromid":"'+fromid+'","toid":"'+toid+'"}';
+                    ws.send(message);
+                    $("#file").val('');
+                }else
+                {
+                    console.log(data.status);
+                }
+                $('.chat-content').scrollTop(3000);
             }
         })
     })
