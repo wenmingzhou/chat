@@ -13,7 +13,7 @@ use think\Request;
 class Chat extends Controller
 {
     /**
-     * ?????????????
+     * 文本消息数据持久化
      */
     public function save_message()
     {
@@ -37,7 +37,7 @@ class Chat extends Controller
     }
 
     /**
-     * ????uid?????????
+     * 根据uid返回用户名
      */
     public function getName($uid)
     {
@@ -46,7 +46,7 @@ class Chat extends Controller
     }
 
     /**
-     * ????uid??????????
+     * 根据uid返回用户头像
      */
     public function get_head()
     {
@@ -66,7 +66,7 @@ class Chat extends Controller
 
 
     /**
-     * ????uid?????????
+     * 根据uid返回用户名
      */
     public function get_name()
     {
@@ -79,13 +79,11 @@ class Chat extends Controller
         }
     }
 
-
     public function get_time()
     {
         if(Request::instance()->isAjax()) {
             $fromid = input('fromid');
             $toid   = input('toid');
-
 
             $count =Db::name("communication")->where('(fromid=:fromid and toid=:toid) || (fromid=:toid1 and toid=:fromid1)',['fromid'=>$fromid,'toid'=>$toid,'toid1'=>$toid,'fromid1'=>$fromid])->count('id');
 
@@ -110,7 +108,7 @@ class Chat extends Controller
     }
 
     /**
-     * ??????????????????
+     * 页面加载显示双方聊天记录
      */
     public function load()
     {
