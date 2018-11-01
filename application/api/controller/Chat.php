@@ -79,12 +79,13 @@ class Chat extends Controller
         }
     }
 
-    
+
     public function get_time()
     {
         if(Request::instance()->isAjax()) {
             $fromid = input('fromid');
             $toid   = input('toid');
+
 
             $count =Db::name("communication")->where('(fromid=:fromid and toid=:toid) || (fromid=:toid1 and toid=:fromid1)',['fromid'=>$fromid,'toid'=>$toid,'toid1'=>$toid,'fromid1'=>$fromid])->count('id');
 
