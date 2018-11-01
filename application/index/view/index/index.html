@@ -31,6 +31,7 @@
         <i class="icon icon-emoji1 t-50"></i>
         <input class="send-input t-28" maxlength="200" id="send-input">
         <input type="file" name="pic" id="file" style="display:none"/>
+
         <i class="icon icon-add image_up t-50" style="color: #888;"></i>
         <span class="send-btn">发送</span>
     </div>
@@ -42,6 +43,7 @@
     var fromhead    ='';
     var tohead      ='';
     var toname      ='';
+    var online      =0;
     var API_URL ='http://www.chat.com/index.php/api/chat/';
     var ws =  new WebSocket("ws://127.0.0.1:8282");
     var toHeader='http://img19.house365.com/ads/nj/2016/01/28/1453970407-632510.jpg';
@@ -75,10 +77,11 @@
                 save_message(message);
                 if(message.is_read==1)
                 {
-
+                    online      =1;
                     $(".shop-online").text("在线");
                 }else
                 {
+                    online      =0;
                     $(".shop-online").text("不在线");
                 }
 
@@ -87,10 +90,11 @@
             case "online":
                 if(message.status==1)
                 {
-
+                    online      =1;
                     $(".shop-online").text("在线");
                 }else
                 {
+                    online      =0;
                     $(".shop-online").text("不在线");
                 }
                 return ;
@@ -216,6 +220,33 @@
         $('.chat-content').scrollTop(3000);
         ws.send(message);
         $(".send-input").val('');
+    })
+
+    $(".image_up").click(function () {
+        $("#file").click();
+    })
+    
+    $("#file").change(function () {
+        formdata =new FormData();
+        formdata.append('fromid',fromid);
+        formdata.append('toid',toid);
+        formdata.append('online',online);
+        formdata.append("file", $("#file")[0].files[0]);
+
+       // formdata.append('file',$("#file")[0].files[0]);
+        $.ajax({
+            url:API_URL+"uploadimg",
+            type:"post",
+            cache:false,
+            data:formdata,
+            dataType:'json',
+            processData:false,
+            contentType:false,
+            success:function (data,status,xhr) {
+
+                console.log(data);
+            }
+        })
     })
 
 </script>
