@@ -67,6 +67,7 @@
                     var online ='{"type":"online","toid":"'+toid+'","fromid":"'+fromid+'"}';
                     ws.send(online);
                     get_time(fromid,toid);
+                    changeNoRead(fromid,toid);
                     return;
             case "text":
                 if(toid==message.fromid){
@@ -76,6 +77,7 @@
                         '</div>');
 
                     $('.chat-content').scrollTop(3000);
+                    changeNoRead(fromid,toid);
                     return;
                 }
 
@@ -89,6 +91,7 @@
                         '</div>');
 
                     $('.chat-content').scrollTop(3000);
+                    changeNoRead(fromid,toid);
                     return;
                 }
 
@@ -119,7 +122,17 @@
                 return ;
         }
     }
+    
+    function changeNoRead() {
+        $.post(
+            API_URL+"changeNoRead",
+            {"fromid":fromid,"toid":toid},
+            function (e) {
 
+
+            })
+    }
+    
     $(function(){
         $('.icon-emoji1').qqFace({
             assign:'send-input',

@@ -27,13 +27,24 @@ class Chat extends Controller
             $datas['toname']    =$this->getName($message['toid']);
             $datas['content']   =$message['data'];
             $datas['time']      =time();
-            $datas['isread']    =$message['is_read'];
+            //$datas['isread']  =$message['is_read'];
+            $datas['isread']    =0;
             $datas['type']      =1;
 
             Db::name("communication")->insert($datas);
 
         }
 
+    }
+
+    public function changeNoRead()
+    {
+        if(Request::instance()->isAjax()) {
+            $fromid = input('toid');
+            $toid = input('fromid');
+            Db::name("communication")->where(['fromid'=>$fromid,'toid'=>$toid])->update(['isread'=>1]);
+
+        }
     }
 
     /**
@@ -167,9 +178,10 @@ class Chat extends Controller
             $data['toid']       =$toid;
             $data['fromname']   =$this->getName($data['fromid']);
             $data['toname']     =$this->getName($data['toid']);
-            $data['isread']     =$online;
+            //$data['isread']     =$online;
+            $data['isread']     =0;
             $data['time']       =time();
-            $data['type']       =2;
+            $data['type']       =0;
 
             $message_id         =Db::name("communication")->insertGetId($data);
             if($message_id)
